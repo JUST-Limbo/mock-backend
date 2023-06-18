@@ -7,12 +7,17 @@ const axios =require('axios')
 
 app.get("/userinfo", (req, res) => {
     console.log('/userinfo');
+    if(!req.cookies.userId){
+        return res.status(200).send({
+            // 未登录
+            code:'401'
+        })
+    }
 	const user = users.find((u) => u.id == req.cookies.userId);
-    console.log(user);
-	if (!user) {
-		return res.status(404).send("找不到该用户")
-	}
-	res.send(user)
+	res.send({
+        code: '200',
+        data: user,
+    });
 })
 app.get("/testaxios", (req, res) => {
     console.log(axios);
