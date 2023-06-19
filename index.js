@@ -8,15 +8,13 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 const cors = require("cors")
-app.use(cors(
-    {
-        "origin": "*",
-        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-        "preflightContinue": false,
-        "optionsSuccessStatus": 204,
-        credentials:true
-    }
-))
+app.use(cors({
+    origin: "http://localhost:9500",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
+    credentials:true
+}))
 
 app.get("/userinfo",(req,res) => {
     if (!req.cookies.userId) {
@@ -65,7 +63,11 @@ app.post('/login',(req,res) => {
         return u.id == id && u.id == password
     })
     if (targetUser) {
-        res.status(200).cookie('userId',targetUser.id).send({
+        res.status(200).cookie('userId',targetUser.id,{
+            sameSite:'none',
+            secure:true,
+            // maxAge:60000, // 毫秒? 标准的好像是秒
+        }).send({
             code: '200'
         })
     } else {
