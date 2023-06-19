@@ -4,33 +4,42 @@ const app = express()
 const users = require("./users.json")
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
-const axios =require('axios')
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 const cors = require("cors")
-app.use(cors())
+app.use(cors(
+    {
+        "origin": "*",
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "preflightContinue": false,
+        "optionsSuccessStatus": 204,
+        credentials:true
+    }
+))
 
-app.get("/userinfo", (req, res) => {
-    if(!req.cookies.userId){
+app.get("/userinfo",(req,res) => {
+    if (!req.cookies.userId) {
         return res.status(200).send({
             // 未登录
-            code:'401'
+            code: '401'
         })
     }
-	const user = users.find((u) => u.id == req.cookies.userId);
-	res.send({
+    const user = users.find((u) => u.id == req.cookies.userId);
+    res.send({
         code: '200',
         data: user,
     });
 })
 
-app.post('/queryuserlist',(req, res) => {
+app.post('/queryuserlist',(req,res) => {
     // 从请求体中获取 page 和 id 参数
-    const { page = 1, name,pageSize = 10 } = req.body;
+    const { page = 1,name,pageSize = 10,gender } = req.body;
 
     // 根据 id 过滤 users 数组
-    const filtered = name ? users.filter(u => u.name === name) : users;
+    const filtered = name ? users.filter(u => {
+        return u.name === name && (gender ? u.gender == gender : true)
+    }) : users;
 
     // 计算 start 和 end
     const start = (page - 1) * pageSize;
@@ -42,19 +51,32 @@ app.post('/queryuserlist',(req, res) => {
         pageSize,
         pageCount: Math.ceil(filtered.length / pageSize),
         page: page,
-        data: filtered.slice(start, end),
+        data: filtered.slice(start,end),
     };
-	res.send({
+    res.send({
         code: '200',
         data: result,
     });
 })
 
-app.get("/testaxios", (req, res) => {
-    console.log(axios);
-    res.send('success')
+app.post('/login',(req,res) => {
+    const { id,password } = req.body
+    const targetUser = users.find(u => {
+        return u.id == id && u.id == password
+    })
+    if (targetUser) {
+        res.status(200).cookie('userId',targetUser.id).send({
+            code: '200'
+        })
+    } else {
+        res.status(200).send({
+            code: '500',
+            msg: '用户名密码不匹配'
+        })
+    }
 })
-app.listen(9600, () => {
-	console.log("服务器已启动，监听端口 9600")
-	console.log("http://localhost:9600")
+
+app.listen(9600,() => {
+    console.log("服务器已启动，监听端口 9600")
+    console.log("http://localhost:9600")
 })
