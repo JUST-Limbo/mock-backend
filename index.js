@@ -13,7 +13,7 @@ app.use(cors({
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     preflightContinue: false,
     optionsSuccessStatus: 204,
-    credentials:true
+    credentials: true
 }))
 
 app.get("/userinfo",(req,res) => {
@@ -35,8 +35,8 @@ app.post('/queryuserlist',(req,res) => {
     const { page = 1,name,pageSize = 10,gender } = req.body;
 
     // 根据 id 过滤 users 数组
-    const filtered =users.filter(u => {
-        return(name? u.name === name:true) && (gender ? u.gender == gender : true)
+    const filtered = users.filter(u => {
+        return (name ? u.name === name : true) && (gender ? u.gender == gender : true)
     })
 
     // 计算 start 和 end
@@ -57,6 +57,24 @@ app.post('/queryuserlist',(req,res) => {
     });
 })
 
+app.get('/user/:id',(req,res) => {
+    const id = req.params.id;
+    const targetUser = users.find(u => {
+        return u.id == id
+    })
+    if (targetUser) {
+        res.status(200).send({
+            code: '200',
+            data:targetUser
+        })
+    } else {
+        res.status(200).send({
+            code: '500',
+            msg: 'not found'
+        })
+    }
+})
+
 app.post('/login',(req,res) => {
     const { id,password } = req.body
     const targetUser = users.find(u => {
@@ -64,8 +82,8 @@ app.post('/login',(req,res) => {
     })
     if (targetUser) {
         res.status(200).cookie('userId',targetUser.id,{
-            sameSite:'none',
-            secure:true,
+            sameSite: 'none',
+            secure: true,
             // maxAge:60000, // 毫秒? 标准的好像是秒
         }).send({
             code: '200'
