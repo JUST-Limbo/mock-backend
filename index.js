@@ -35,9 +35,9 @@ app.post('/queryuserlist',(req,res) => {
     const { page = 1,name,pageSize = 10,gender } = req.body;
 
     // 根据 id 过滤 users 数组
-    const filtered = name ? users.filter(u => {
-        return u.name === name && (gender ? u.gender == gender : true)
-    }) : users;
+    const filtered =users.filter(u => {
+        return(name? u.name === name:true) && (gender ? u.gender == gender : true)
+    })
 
     // 计算 start 和 end
     const start = (page - 1) * pageSize;
