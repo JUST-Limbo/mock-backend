@@ -20,7 +20,8 @@ app.get("/userinfo",(req,res) => {
     if (!req.cookies.userId) {
         return res.status(200).send({
             // 未登录
-            code: '401'
+            code: '401',
+            msg:'未登录'
         })
     }
     const user = users.find((u) => u.id == req.cookies.userId);
